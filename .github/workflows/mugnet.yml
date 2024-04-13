@@ -1,0 +1,44 @@
+name: CI
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'Torrent file URL'
+        required: true
+      destination:
+        description: 'Where do you want to install??'
+      compress:
+        description: 'Compress File After Download'
+      upload-c:
+        description: 'upload compressed'
+      upload:
+        description: 'upload uncompressed'
+jobs:
+  build:
+    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: install_dependencies
+      run: |
+          sudo apt-get update -y -qq
+          sudo apt-get install transmission-cli 
+    - name: init_submodules
+      run: git submodule update --init --recursive
+    - name: Build
+      run: transmission-cli ${{ github.event.inputs.url }} -w ${{ github.event.inputs.destination }}
+    - name: Upload artifact
+      if: github.event.inputs.upload-c == '1'
+      uses: actions/upload-artifact@v4
+      with:
+        name: Torrent
+        path: download.tar.gz
+    - name: Upload uncompressed artifact
+      if: github.event.inputs.upload == '1'
+      uses: actions/upload-artifact@v4
+      with:
+        name: Torrent
+        path: ${{github.workspace}}
+    - name: Compress
+      if: github.event.inputs.compress == '1'
+      run: tar -czvf download.tar.gz ${{github.workspace}}
