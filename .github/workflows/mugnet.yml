@@ -8,11 +8,12 @@ on:
       destination:
         description: 'Where do you want to install??'
       compress:
-        description: 'Compress File After Download'
+        description: 'Compress File After Download?'
       upload-c:
         description: 'upload compressed'
       upload:
         description: 'upload uncompressed'
+
 jobs:
   build:
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
@@ -26,7 +27,11 @@ jobs:
     - name: init_submodules
       run: git submodule update --init --recursive
     - name: Build
-      run: transmission-cli ${{ github.event.inputs.url }} -w ${{ github.event.inputs.destination }}
+      run: |
+       tmpfile=$(mktemp)
+       chmod a+x $tmpfile
+       echo "killall transmission-cli" > $tmpfile
+       transmission-cli -f $tmpfile ${{ github.event.inputs.url }} -w ${{ github.event.inputs.destination }}
     - name: Upload artifact
       if: github.event.inputs.upload-c == '1'
       uses: actions/upload-artifact@v4
