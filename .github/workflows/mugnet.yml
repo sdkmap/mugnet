@@ -6,16 +6,14 @@ on:
         description: 'Torrent file URL'
         required: true
       destination:
-        description: 'Where do you want to install??'
+        description: 'Where do you want to install?'
       compress:
         description: 'Compress File After Download?'
-      upload-c:
-        description: 'upload compressed'
       upload:
-        description: 'upload uncompressed'
+        description: 'Upload Compressed?'
 
 jobs:
-  build:
+  GitBIT:
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
     runs-on: ubuntu-latest
     steps:
@@ -23,7 +21,7 @@ jobs:
       run: |
           sudo apt-get update -y -qq
           sudo apt-get install transmission-cli 
-    - name: Build
+    - name: Grab
       run: |
        tmpfile=$(mktemp)
        chmod a+x $tmpfile
@@ -34,13 +32,13 @@ jobs:
       if: github.event.inputs.compress == '1'
       run: tar -czvf download.tar.gz .
     - name: Upload artifact
-      if: github.event.inputs.upload-c == '1'
+      if: github.event.inputs.upload == '1'
       uses: actions/upload-artifact@v4
       with:
         name: Torrent
         path: download.tar.gz
     - name: Upload uncompressed artifact
-      if: github.event.inputs.upload == '1'
+      if: github.event.inputs.upload == '0'
       uses: actions/upload-artifact@v4
       with:
         name: Torrent
