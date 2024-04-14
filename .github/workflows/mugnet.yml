@@ -32,7 +32,7 @@ jobs:
       continue-on-error: true 
     - name: Compress
       if: github.event.inputs.compress == '1'
-      run: tar -czvf download.tar.gz ${{github.workspace}}
+      run: tar -czvf download.tar.gz -C ${{github.workspace}} .
     - name: Upload artifact
       if: github.event.inputs.upload-c == '1'
       uses: actions/upload-artifact@v4
