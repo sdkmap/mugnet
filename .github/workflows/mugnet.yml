@@ -8,9 +8,9 @@ on:
       destination:
         description: 'Where do you want to install?'
       compress:
-        description: 'Compress File After Download?'
-      upload:
-        description: 'Upload Compressed?'
+        type: boolean
+        required: false
+        description: Do you want to compress and upload?
 
 jobs:
   GitBIT:
@@ -29,16 +29,16 @@ jobs:
        transmission-cli -f $tmpfile ${{ github.event.inputs.url }} -w ${{ github.event.inputs.destination }}
       continue-on-error: true 
     - name: Compress
-      if: github.event.inputs.compress == '1'
+      if: inputs.compress
       run: tar -czvf download.tar.gz .
-    - name: Upload artifact
-      if: github.event.inputs.upload == '1'
+    - name: Upload compressed artifact
+      if: inputs.compress
       uses: actions/upload-artifact@v4
       with:
         name: Torrent
         path: download.tar.gz
-    - name: Upload uncompressed artifact
-      if: github.event.inputs.upload == '0'
+    - name: Upload uncompressed artifact 
+      if: github.event.inputs.compress == false
       uses: actions/upload-artifact@v4
       with:
         name: Torrent
