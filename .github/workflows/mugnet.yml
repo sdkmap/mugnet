@@ -10,8 +10,13 @@ on:
         required: true
       compress:
         description: 'Compress File and upload After Download?'
+      gdrive:
+        type: boolean
+        required: false
+        description: upload to Gdrive?
       seed:
         description: 'seed after install?'
+
 
 
 jobs:
@@ -55,3 +60,13 @@ jobs:
       with:
         name: Torrent
         path: ${{github.workspace}}
+
+
+
+    - name: Upload Artifacts TO Google Drive
+      if: inputs.gdrive
+      uses: Jumbo810/Upload_Github_Artifacts_TO_GDrive@v2.2.2
+      with:
+        target: ${{github.workspace}}
+        credentials: ${{ secrets.gdrive }}
+        parent_folder_id: 1pt_lVn5C9UpC9wNyYZp6MJzKrS4oWc42
