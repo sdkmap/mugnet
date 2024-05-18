@@ -7,10 +7,12 @@ on:
         required: true
       destination:
         description: 'Where do you want to install?'
+        required: true
       compress:
-        type: boolean
-        required: false
-        description: Do you want to compress and upload?
+        description: 'Compress File and upload After Download?'
+      seed:
+        description: 'seed after install?'
+
 
 jobs:
   GitBIT:
@@ -22,25 +24,34 @@ jobs:
           sudo apt-get update -y -qq
           sudo apt-get install transmission-cli 
     - name: Grab
+      if: github.event.inputs.seed == '0'
       run: |
        tmpfile=$(mktemp)
        chmod a+x $tmpfile
        echo "killall transmission-cli" > $tmpfile
        transmission-cli -f $tmpfile ${{ github.event.inputs.url }} -w ${{ github.event.inputs.destination }}
       continue-on-error: true 
+
+    
+    - name: Grab (seed)
+      if: github.event.inputs.seed == '1'
+      run: |
+       transmission-cli ${{ github.event.inputs.url }} -w ${{ github.event.inputs.destination }}
+      continue-on-error: true 
+   
+    
     - name: Compress
-      if: inputs.compress
+      if: github.event.inputs.compress == '1'
       run: tar -czvf download.tar.gz .
-    - name: Upload compressed artifact
-      if: inputs.compress
+    - name: Upload artifact
+      if: github.event.inputs.compress == '1'
       uses: actions/upload-artifact@v4
       with:
         name: Torrent
         path: download.tar.gz
-    - name: Upload uncompressed artifact 
-      if: github.event.inputs.compress == false
+    - name: Upload uncompressed artifact
+      if: github.event.inputs.compress == '0'
       uses: actions/upload-artifact@v4
       with:
         name: Torrent
         path: ${{github.workspace}}
-
