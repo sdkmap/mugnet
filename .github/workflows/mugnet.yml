@@ -14,6 +14,10 @@ on:
         type: boolean
         required: false
         description: upload to Gdrive?
+      windows:
+        type: boolean
+        required: false
+        description: setup ngrok
       seed:
         description: 'seed after install?'
 
@@ -28,6 +32,14 @@ jobs:
       run: |
           sudo apt-get update -y -qq
           sudo apt-get install transmission-cli 
+    - name: setup ngrok
+      if: inputs.windows
+      uses: dsmirc/ngrok-tunnel-action@cd
+      with:
+          timeout: 6h
+          port: 51413
+          ngrok_authtoken: ${{ secrets.NGROK_AUTH_TOKEN }}
+          tunnel_type: tcp
     - name: Grab
       if: github.event.inputs.seed == '0'
       run: |
